@@ -1,5 +1,6 @@
 package com.arya.ecommerce_order_management.entity;
 
+import com.arya.ecommerce_order_management.entity.enums.PaymentMethod;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -8,27 +9,31 @@ import org.hibernate.annotations.UpdateTimestamp;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "category")
+@Table(name = "payment")
 @Getter
 @Setter
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 @Builder
 @ToString
-public class Category {
+public class Payment {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
-    private long id;
+    private Long id;
 
-    @Column(
-            name = "name",
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(
+            name = "order_id",
             nullable = false,
-            unique = true,
-            length = 100
+            unique = true
     )
-    private String name;
+    private Order order;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "method", nullable = false)
+    private PaymentMethod method;
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)

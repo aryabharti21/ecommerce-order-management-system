@@ -1,5 +1,6 @@
 package com.arya.ecommerce_order_management.entity;
 
+import com.arya.ecommerce_order_management.entity.enums.InventoryStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -8,27 +9,34 @@ import org.hibernate.annotations.UpdateTimestamp;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "category")
+@Table(name = "inventory")
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
 @ToString
-public class Category {
+public class Inventory {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
-    private long id;
+    private Long id;
 
-    @Column(
-            name = "name",
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(
+            name = "product_id",
             nullable = false,
-            unique = true,
-            length = 100
+            unique = true
     )
-    private String name;
+    private Product product;
+
+    @Column(name = "item_count", nullable = false)
+    private Integer itemCount;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false)
+    private InventoryStatus status;
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
@@ -37,5 +45,4 @@ public class Category {
     @UpdateTimestamp
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
-
 }

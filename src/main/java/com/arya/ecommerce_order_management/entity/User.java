@@ -8,27 +8,28 @@ import org.hibernate.annotations.UpdateTimestamp;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "category")
+@Table(name = "user")
 @Getter
 @Setter
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 @Builder
 @ToString
-public class Category {
+public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
-    private long id;
+    private Long id;
 
-    @Column(
-            name = "name",
-            nullable = false,
-            unique = true,
-            length = 100
-    )
+    @Column(name = "name", nullable = false, length = 100)
     private String name;
+
+    @Column(name = "phone",  nullable = false, unique = true, length = 15)
+    private String phone;
+
+    @Column(name = "email", nullable = false, unique = true, length = 150)
+    private String email;
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
@@ -37,5 +38,4 @@ public class Category {
     @UpdateTimestamp
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
-
 }
