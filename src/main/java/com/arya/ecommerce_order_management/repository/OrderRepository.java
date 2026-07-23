@@ -16,20 +16,4 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     Optional<Order> findByOrderNo(String orderNo);
 
     List<Order> findByUserId(Long userId);
-
-    List<Order> findByStatus(OrderStatus status);
-
-    List<Order> findByUserIdAndStatus(Long userId, OrderStatus status);
-
-    List<Order> findByUserIdOrderByCreatedAtDesc(Long userId);
-
-    List<Order> findByCreatedAtBetween(LocalDateTime from, LocalDateTime to);
-
-    // JPQL with JOIN - get orders with user details
-    @Query("SELECT o FROM Order o " +
-            "JOIN FETCH o.user " +       // JOIN FETCH = load user eagerly in same query
-            "JOIN FETCH o.address " +    // avoids N+1 query problem
-            "WHERE o.user.id = :userId " +
-            "ORDER BY o.createdAt DESC")
-    List<Order> findOrdersWithDetailsByUserId(@Param("userId") Long userId);
 }

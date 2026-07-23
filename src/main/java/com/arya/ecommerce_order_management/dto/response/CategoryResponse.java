@@ -8,7 +8,6 @@ public record CategoryResponse(
         String name,
         LocalDateTime createdAt
 ) {
-    // Static factory method - converts Entity to DTO
     public static CategoryResponse from(Category category) {
         return new CategoryResponse(
                 category.getId(),

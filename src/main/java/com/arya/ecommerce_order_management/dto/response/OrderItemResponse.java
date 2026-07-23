@@ -9,7 +9,7 @@ public record OrderItemResponse(
         String productName,
         Integer quantity,
         BigDecimal priceAtPurchase,
-        BigDecimal itemTotal          // quantity * priceAtPurchase
+        BigDecimal itemTotal
 ) {
     public static OrderItemResponse from(OrderItem item) {
         return new OrderItemResponse(

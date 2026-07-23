@@ -15,5 +15,4 @@ public interface UserAddressRepository extends JpaRepository<UserAddress, UserAd
 
     boolean existsByUserIdAndId_AddressId(Long userId, Long addressId);
 
-    List<UserAddress> findByAddressId(Long addressId);
 }

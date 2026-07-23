@@ -5,7 +5,7 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 
 import java.util.List;
-//need to check how this nested is working
+
 public record CreateOrderRequest(
         @NotNull(message = "User id is required")
         Long userId,
@@ -17,7 +17,11 @@ public record CreateOrderRequest(
         List<OrderItemRequest> items
 ) {
     public record OrderItemRequest(
-            @NotNull Long productId,
-            @Min(value = 1, message = "Quantity must be at least 1") Integer quantity
+            @NotNull
+            Long productId,
+
+            @NotNull(message = "Quantity is required")
+            @Min(value = 1, message = "Quantity must be at least 1")
+            Integer quantity
     ) {}
 }

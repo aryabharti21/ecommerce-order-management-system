@@ -16,10 +16,6 @@ public interface InventoryRepository extends JpaRepository<Inventory, Long> {
 
     Optional<Inventory> findByProductId(Long productId);
 
-    List<Inventory> findByStatus(InventoryStatus status);
-
-    boolean existsByProductIdAndStatus(Long productId, InventoryStatus status);
-
     @Modifying
     @Transactional
     @Query("UPDATE Inventory i SET i.itemCount = i.itemCount - :quantity " +
@@ -28,4 +24,11 @@ public interface InventoryRepository extends JpaRepository<Inventory, Long> {
             @Param("productId") Long productId,
             @Param("quantity") int quantity
     );
+
+    @Modifying
+    @Transactional
+    @Query("UPDATE Inventory i SET i.itemCount = i.itemCount + :quantity " +
+            "WHERE i.product.id = :productId")
+    int increaseStock(@Param("productId") Long productId,
+                      @Param("quantity") int quantity);
 }

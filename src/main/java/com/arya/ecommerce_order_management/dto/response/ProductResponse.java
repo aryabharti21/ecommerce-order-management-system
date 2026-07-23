@@ -9,7 +9,7 @@ public record ProductResponse(
         String name,
         BigDecimal price,
         String description,
-        String categoryName,       // flatten category - just name, not full object
+        String categoryName,
         LocalDateTime createdAt
 ) {
     public static ProductResponse from(Product product) {
@@ -18,7 +18,7 @@ public record ProductResponse(
                 product.getName(),
                 product.getPrice(),
                 product.getDescription(),
-                product.getCategory().getName(),  // navigate relationship
+                product.getCategory().getName(),
                 product.getCreatedAt()
         );
     }
