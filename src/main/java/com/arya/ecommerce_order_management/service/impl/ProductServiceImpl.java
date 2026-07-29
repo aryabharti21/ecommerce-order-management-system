@@ -79,7 +79,7 @@ public class ProductServiceImpl implements ProductService {
     @Transactional(readOnly = true)
     public List<ProductResponse> getAllProductsByCategoryId(Long id) {
 
-        if (categoryRepository.existsById(id)) throw new ResourceNotFoundException("Category", "id", id);
+        if (!categoryRepository.existsById(id)) throw new ResourceNotFoundException("Category", "id", id);
 
         return productRepository.findByCategoryId(id)
                 .stream()

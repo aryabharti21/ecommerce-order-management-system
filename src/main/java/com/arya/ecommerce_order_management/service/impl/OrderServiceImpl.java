@@ -124,7 +124,7 @@ public class OrderServiceImpl implements OrderService {
     @Transactional(readOnly = true)
     public List<OrderResponse> getOrdersByUserId(Long userId) {
 
-        if (userRepository.findById(userId).isPresent()) throw new ResourceNotFoundException("User", "id", userId);
+        if (!userRepository.existsById(userId)) throw new ResourceNotFoundException("User", "id", userId);
 
         List<Order> orders = orderRepository.findByUserId(userId);
 
