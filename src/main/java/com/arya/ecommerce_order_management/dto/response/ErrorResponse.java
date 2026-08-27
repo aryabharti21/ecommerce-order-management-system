@@ -8,4 +8,8 @@ public record ErrorResponse(
         String message,
         LocalDateTime timeStamp,
         Map<String, String> fieldErrors
-) {}
+) {
+    public ErrorResponse(int status, String message, LocalDateTime timeStamp) {
+        this(status, message, timeStamp, null);
+    }
+}

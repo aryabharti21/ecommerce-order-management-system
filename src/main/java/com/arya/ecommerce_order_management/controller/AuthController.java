@@ -1,6 +1,8 @@
 package com.arya.ecommerce_order_management.controller;
 
+import com.arya.ecommerce_order_management.dto.request.LoginRequest;
 import com.arya.ecommerce_order_management.dto.request.RegisterRequest;
+import com.arya.ecommerce_order_management.dto.response.LoginResponse;
 import com.arya.ecommerce_order_management.dto.response.UserResponse;
 import com.arya.ecommerce_order_management.service.AuthService;
 import jakarta.validation.Valid;
@@ -24,5 +26,10 @@ public class AuthController {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(authService.register(request));
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<LoginResponse> login(@RequestBody @Valid LoginRequest request) {
+        return ResponseEntity.ok(authService.login(request));
     }
 }

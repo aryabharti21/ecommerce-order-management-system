@@ -1,6 +1,3 @@
-CREATE DATABASE ecommerce_oms;
-USE ecommerce_oms;
-
 -- 1. Category (no dependencies)
 CREATE TABLE category (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,

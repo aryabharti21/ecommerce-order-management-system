@@ -5,7 +5,7 @@ spring:
   datasource:
     url: jdbc:mysql://localhost:3306/ecommerce_oms?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
     username: root
-    password: root
+    password: ab5631  #root for other
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   jpa:
@@ -30,3 +30,8 @@ logging:
     org.flywaydb: DEBUG
     org.springframework.boot.autoconfigure.flyway: DEBUG
     org.hibernate.orm.jdbc.bind: TRACE
+
+jwt:
+  secret: ${JWT_SECRET:this-is-a-temporary-local-dev-secret-change-me-before-prod-32chars-min}
+  expiration: 900000        # 15 minutes, in milliseconds — short-lived access token
+  refresh-expiration: 604800000   # 7 days, for the refresh token (we'll use this shortly)
