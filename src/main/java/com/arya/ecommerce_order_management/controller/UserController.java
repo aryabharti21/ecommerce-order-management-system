@@ -4,11 +4,13 @@ import com.arya.ecommerce_order_management.dto.request.CreateAddressRequest;
 import com.arya.ecommerce_order_management.dto.request.CreateUserRequest;
 import com.arya.ecommerce_order_management.dto.response.AddressResponse;
 import com.arya.ecommerce_order_management.dto.response.UserResponse;
+import com.arya.ecommerce_order_management.entity.User;
 import com.arya.ecommerce_order_management.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,32 +22,32 @@ public class UserController {
 
     private final UserService userService;
 
-    @PostMapping
+    /*@PostMapping
     public ResponseEntity<UserResponse> registerUser(
             @RequestBody @Valid CreateUserRequest request) {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(userService.registerUser(request));
+    }*/
+
+    @GetMapping("/me")
+    public ResponseEntity<UserResponse> getMyProfile(
+            @AuthenticationPrincipal User currentUser) {
+        return ResponseEntity.ok(userService.getUserById(currentUser.getId()));
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<UserResponse> getUserById(
-            @PathVariable Long id) {
-        return ResponseEntity.ok(userService.getUserById(id));
-    }
-
-    @PostMapping("/{userId}/addresses")
+    @PostMapping("/me/addresses")
     public ResponseEntity<AddressResponse> addAddressToUser(
-            @PathVariable Long userId,
-            @RequestBody @Valid CreateAddressRequest request) {
+            @RequestBody @Valid CreateAddressRequest request,
+            @AuthenticationPrincipal User currentUser) {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(userService.addAddressToUser(userId, request));
+                .body(userService.addAddressToUser(currentUser.getId(), request));
     }
 
-    @GetMapping("/{userId}/addresses")
+    @GetMapping("/me/addresses")
     public ResponseEntity<List<AddressResponse>> getUserAddresses(
-            @PathVariable Long userId) {
-        return ResponseEntity.ok(userService.getUserAddresses(userId));
+            @AuthenticationPrincipal User currentUser) {
+        return ResponseEntity.ok(userService.getUserAddresses(currentUser.getId()));
     }
 }

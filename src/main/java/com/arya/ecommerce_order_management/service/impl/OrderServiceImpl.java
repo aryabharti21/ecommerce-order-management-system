@@ -3,6 +3,7 @@ package com.arya.ecommerce_order_management.service.impl;
 import com.arya.ecommerce_order_management.dto.request.CreateOrderRequest;
 import com.arya.ecommerce_order_management.dto.response.OrderItemResponse;
 import com.arya.ecommerce_order_management.dto.response.OrderResponse;
+import com.arya.ecommerce_order_management.dto.response.PageResponse;
 import com.arya.ecommerce_order_management.entity.*;
 import com.arya.ecommerce_order_management.entity.enums.OrderStatus;
 import com.arya.ecommerce_order_management.exception.InsufficientStockException;
@@ -10,6 +11,9 @@ import com.arya.ecommerce_order_management.exception.ResourceNotFoundException;
 import com.arya.ecommerce_order_management.repository.*;
 import com.arya.ecommerce_order_management.service.OrderService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,11 +37,11 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     @Transactional
-    public OrderResponse createOrder(CreateOrderRequest request) {
-        User user = userRepository.findById(request.userId())
-                .orElseThrow(() -> new ResourceNotFoundException("User", "id", request.userId()));
+    public OrderResponse createOrder(CreateOrderRequest request, Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
 
-        if (!userAddressRepository.existsByUserIdAndId_AddressId(request.userId(), request.addressId())) {
+        if (!userAddressRepository.existsByUser_IdAndId_AddressId(userId, request.addressId())) {
             throw new ResourceNotFoundException("Address", "id", request.addressId());
         }
 
@@ -122,21 +126,23 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<OrderResponse> getOrdersByUserId(Long userId) {
+    public PageResponse<OrderResponse> getOrderByUserId(Long userId, Pageable pageable) {
 
         if (!userRepository.existsById(userId)) throw new ResourceNotFoundException("User", "id", userId);
 
-        List<Order> orders = orderRepository.findByUserId(userId);
+        Page<Order> orderPage = orderRepository.findByUserId(userId, pageable);
 
-        return orders.stream()
+        Page<OrderResponse> responsePage = orderPage
                 .map(order -> {
-                    List<OrderItemResponse> itemResponses = orderItemRepository.findByOrderId(order.getId())
-                            .stream()
-                            .map(OrderItemResponse::from)
-                            .toList();
-                    return OrderResponse.from(order,itemResponses);
-                })
-                .toList();
+                    List<OrderItemResponse> itemResponses =
+                            orderItemRepository.findByOrderId(order.getId())
+                                    .stream()
+                                    .map(OrderItemResponse::from)
+                                    .toList();
+                    return OrderResponse.from(order, itemResponses);
+                });
+
+        return PageResponse.from(responsePage);
     }
 
     @Override
@@ -148,7 +154,7 @@ public class OrderServiceImpl implements OrderService {
 
         //checking if order belongs to this user
         if (!order.getUser().getId().equals(userId)) {
-            throw new ResourceNotFoundException("User", "id", userId);
+            throw new AccessDeniedException("You can only cancel your own orders");
         }
 
         if (order.getStatus() == OrderStatus.DELIVERED ||

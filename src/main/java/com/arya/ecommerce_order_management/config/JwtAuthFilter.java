@@ -1,6 +1,7 @@
 package com.arya.ecommerce_order_management.config;
 
-import com.arya.ecommerce_order_management.service.JwtService;
+import com.arya.ecommerce_order_management.entity.User;
+import com.arya.ecommerce_order_management.repository.UserRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -8,17 +9,18 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.List;
 
 @Component
 @RequiredArgsConstructor
 public class JwtAuthFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
+    private final UserRepository userRepository;
 
     @Override
     protected void doFilterInternal(
@@ -28,19 +30,29 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     ) throws ServletException, IOException {
 
         String authHeader = request.getHeader("Authorization");
-
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            filterChain.doFilter(request, response);   // no token — let it pass through, authorizeHttpRequests will reject if needed
+            filterChain.doFilter(request, response);   // no token = no authorization
             return;
         }
 
         String token = authHeader.substring(7);   // strip "Bearer " prefix
+        if (!jwtService.isTokenValid(token)) {
+            filterChain.doFilter(request, response);    // invalid/expired token = no authorization
+            return;
+        }
+
         String email = jwtService.extractEmail(token);
 
         if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            if (jwtService.isTokenValid(token, email)) {
-                UsernamePasswordAuthenticationToken authToken =
-                        new UsernamePasswordAuthenticationToken(email, null, List.of());
+
+            User user = userRepository.findByEmail(email)
+                    .orElse(null);
+
+            if (user != null){
+                UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken
+                        (user, null, user.getAuthorities());
+
+                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
                 SecurityContextHolder.getContext().setAuthentication(authToken);
             }

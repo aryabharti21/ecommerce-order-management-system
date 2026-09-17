@@ -1,7 +1,10 @@
-package com.arya.ecommerce_order_management.service;
+package com.arya.ecommerce_order_management.config;
 
+import com.arya.ecommerce_order_management.entity.User;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -13,21 +16,22 @@ import java.util.function.Function;
 @Service
 public class JwtService {
 
-    @Value("${jwt.secret}")
+    @Value("${application.security.jwt.secret-key}")
     private String secret;
 
-    @Value("${jwt.expiration}")
+    @Value("${application.security.jwt.expiration}")
     private long expiration;
 
     private SecretKey getSigningKey() {
-        return Keys.hmacShaKeyFor(secret.getBytes());
+        byte[] keyBytes = Decoders.BASE64.decode(secret);
+        return Keys.hmacShaKeyFor(keyBytes);
     }
 
-    public String generateToken(String email, Long userId, String role) {
+    public String generateToken(User user) {
         return Jwts.builder()
-                .subject(email)
-                .claim("userId", userId)
-                .claim("role", role)
+                .subject(user.getEmail())
+                .claim("userId", user.getId())
+                .claim("role", user.getRole().name())
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + expiration))
                 .signWith(getSigningKey())
@@ -39,12 +43,21 @@ public class JwtService {
     }
 
     public Long extractUserId(String token) {
-        return extractAllClaims(token).get("userId", Long.class);
+        Object userId = extractAllClaims(token).get("userId");
+        if (userId instanceof Long) return (Long) userId;
+        if (userId instanceof Integer) return ((Integer) userId).longValue();
+        return Long.valueOf(userId.toString());
     }
 
-    public boolean isTokenValid(String token, String expectedEmail) {
-        String email = extractEmail(token);
-        return email.equals(expectedEmail) && !isTokenExpired(token);
+    public boolean isTokenValid(String token) {
+        try {
+            extractAllClaims(token);
+            return true;
+        } catch (ExpiredJwtException e) {
+            return false;
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     private boolean isTokenExpired(String token) {

@@ -1,5 +1,5 @@
 -- 1. Category (no dependencies)
-CREATE TABLE category (
+CREATE TABLE categories (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(100) NOT NULL UNIQUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -7,7 +7,7 @@ CREATE TABLE category (
 );
 
 -- 2. Product (depends on Category)
-CREATE TABLE product (
+CREATE TABLE products (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(150) NOT NULL,
     category_id BIGINT NOT NULL,
@@ -15,7 +15,7 @@ CREATE TABLE product (
     description TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    CONSTRAINT fk_product_category FOREIGN KEY (category_id) REFERENCES category(id)
+    CONSTRAINT fk_product_category FOREIGN KEY (category_id) REFERENCES categories(id)
 );
 
 -- 3. Inventory (depends on Product)
@@ -26,11 +26,11 @@ CREATE TABLE inventory (
     status ENUM('AVAILABLE', 'OUT_OF_STOCK') NOT NULL DEFAULT 'AVAILABLE',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    CONSTRAINT fk_inventory_product FOREIGN KEY (product_id) REFERENCES product(id)
+    CONSTRAINT fk_inventory_product FOREIGN KEY (product_id) REFERENCES products(id)
 );
 
 -- 4. User (no dependencies)
-CREATE TABLE user (
+CREATE TABLE users (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
     phone VARCHAR(15) NOT NULL UNIQUE,
@@ -40,7 +40,7 @@ CREATE TABLE user (
 );
 
 -- 5. Address (no dependencies)
-CREATE TABLE address (
+CREATE TABLE addresses (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     country VARCHAR(100) NOT NULL,
     state VARCHAR(100) NOT NULL,
@@ -53,12 +53,12 @@ CREATE TABLE address (
 );
 
 -- 6. UserAddress (junction: User N:M Address)
-CREATE TABLE user_address (
+CREATE TABLE user_addresses (
     user_id BIGINT NOT NULL,
     address_id BIGINT NOT NULL,
     PRIMARY KEY (user_id, address_id),
-    CONSTRAINT fk_useraddress_user FOREIGN KEY (user_id) REFERENCES user(id),
-    CONSTRAINT fk_useraddress_address FOREIGN KEY (address_id) REFERENCES address(id)
+    CONSTRAINT fk_useraddress_user FOREIGN KEY (user_id) REFERENCES users(id),
+    CONSTRAINT fk_useraddress_address FOREIGN KEY (address_id) REFERENCES addresses(id)
 );
 
 -- 7. Orders (depends on User, Address)
@@ -67,16 +67,16 @@ CREATE TABLE orders (
     order_no VARCHAR(30) NOT NULL UNIQUE,
     user_id BIGINT NOT NULL,
     address_id BIGINT NOT NULL,
-    status ENUM('PLACED', 'SHIPPED', 'DELIVERED', 'CANCELLED') NOT NULL DEFAULT 'PLACED',
+    status ENUM('PLACED', 'CONFIRMED', 'SHIPPED', 'DELIVERED', 'CANCELLED') NOT NULL DEFAULT 'PLACED',
     amount DECIMAL(10,2) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    CONSTRAINT fk_order_user FOREIGN KEY (user_id) REFERENCES user(id),
-    CONSTRAINT fk_order_address FOREIGN KEY (address_id) REFERENCES address(id)
+    CONSTRAINT fk_order_user FOREIGN KEY (user_id) REFERENCES users(id),
+    CONSTRAINT fk_order_address FOREIGN KEY (address_id) REFERENCES addresses(id)
 );
 
 -- 8. OrderItem (junction with data: Order N:M Product)
-CREATE TABLE order_item (
+CREATE TABLE order_items (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     order_id BIGINT NOT NULL,
     product_id BIGINT NOT NULL,
@@ -85,14 +85,14 @@ CREATE TABLE order_item (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     CONSTRAINT fk_orderitem_order FOREIGN KEY (order_id) REFERENCES orders(id),
-    CONSTRAINT fk_orderitem_product FOREIGN KEY (product_id) REFERENCES product(id)
+    CONSTRAINT fk_orderitem_product FOREIGN KEY (product_id) REFERENCES products(id)
 );
 
 -- 9. Payment (depends on Orders)
-CREATE TABLE payment (
+CREATE TABLE payments (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     order_id BIGINT NOT NULL UNIQUE,
-    method ENUM('CARD', 'CASH', 'NETBANKING') NOT NULL,
+    method ENUM('CARD', 'UPI', 'NET_BANKING', 'COD') NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     CONSTRAINT fk_payment_order FOREIGN KEY (order_id) REFERENCES orders(id)

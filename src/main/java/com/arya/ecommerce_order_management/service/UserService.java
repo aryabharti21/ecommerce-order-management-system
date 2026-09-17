@@ -9,8 +9,8 @@ import com.arya.ecommerce_order_management.entity.User;
 import java.util.List;
 
 public interface UserService {
-    UserResponse registerUser(CreateUserRequest request);
+    //UserResponse registerUser(CreateUserRequest request);
     UserResponse getUserById(Long id);
     AddressResponse addAddressToUser(Long userId, CreateAddressRequest request);
-    List<AddressResponse> getUserAddresses(Long id);
+    List<AddressResponse> getUserAddresses(Long userId);
 }

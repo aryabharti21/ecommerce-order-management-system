@@ -1,0 +1,17 @@
+# app-service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: ecommerce-app-service
+spec:
+  selector:
+    app: ecommerce-app
+
+  ports:
+    - port: 8080
+      targetPort: 8080
+
+  type: LoadBalancer
+  # LoadBalancer = reachable from OUTSIDE the cluster
+  # This is how users access your app
+  # On local Docker Desktop K8s: maps to localhost

@@ -59,7 +59,9 @@ public class CategoryServiceImpl implements CategoryService {
         Category category = categoryRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Category", "id", id));
 
-        if (categoryRepository.existsByName(request.name())){
+        boolean nameChanged = !category.getName().equals(request.name());
+
+        if (nameChanged && categoryRepository.existsByName(request.name())){
             throw new DuplicateResourceException("Category",  "name", request.name());
         }
 
@@ -74,7 +76,7 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     @Transactional
     public void deleteCategory(Long id) {
-        if (categoryRepository.existsById(id)){
+        if (!categoryRepository.existsById(id)){
             throw new ResourceNotFoundException("Category", "id", id);
         }
 

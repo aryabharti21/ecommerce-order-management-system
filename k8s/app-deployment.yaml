@@ -1,0 +1,58 @@
+# app-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ecommerce-app-deployment
+spec:
+  replicas: 2
+  # 2 copies of your app running
+  # If one crashes → still 1 serving traffic
+  # K8s automatically creates replacement
+
+  selector:
+    matchLabels:
+      app: ecommerce-app
+
+  template:
+    metadata:
+      labels:
+        app: ecommerce-app
+
+    spec:
+      containers:
+        - name: ecommerce-app
+          image: ecommerce-api:latest
+          # Same image you built in Phase 8!
+          # No changes needed to your Dockerfile
+
+          ports:
+            - containerPort: 8080
+
+          envFrom:
+            - configMapRef:
+                name: app-config
+                # Injects ALL ConfigMap values as env vars
+            - secretRef:
+                name: app-secret
+                # Injects ALL Secret values as env vars
+
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "250m"
+            limits:
+              memory: "1Gi"
+              cpu: "500m"
+          # requests = minimum guaranteed resources
+          # limits   = maximum allowed resources
+          # Prevents one Pod from consuming entire server
+
+          readinessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          # K8s checks this URL to know if Pod is ready
+          # Only sends traffic to Pods that pass this check
+          # (Requires spring-boot-starter-actuator dependency)

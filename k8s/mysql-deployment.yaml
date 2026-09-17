@@ -1,0 +1,55 @@
+# mysql-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql-deployment
+spec:
+  replicas: 1
+  # Only 1 MySQL instance
+  # WHY not 3 like the app?
+  # Database needs careful clustering (not simple replication)
+  # For learning purposes: 1 is correct
+
+  selector:
+    matchLabels:
+      app: mysql
+      # This deployment manages Pods with label "app: mysql"
+
+  template:
+    metadata:
+      labels:
+        app: mysql
+        # Pods created by this deployment get this label
+
+    spec:
+      containers:
+        - name: mysql
+          image: mysql:8.0
+          ports:
+            - containerPort: 3306
+
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-secret
+                  key: MYSQL_ROOT_PASSWORD
+                  # Pull password from Secret (not hardcoded here)
+
+            - name: MYSQL_DATABASE
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-secret
+                  key: MYSQL_DATABASE
+
+          volumeMounts:
+            - name: mysql-storage
+              mountPath: /var/lib/mysql
+              # Persist data (same concept as Docker volume)
+
+      volumes:
+        - name: mysql-storage
+          emptyDir: {}
+          # emptyDir = simplest storage type for LEARNING
+          # Data lost if Pod is deleted (not production-safe)
+          # Production uses PersistentVolumeClaim (advanced topic)

@@ -1,6 +1,9 @@
 package com.arya.ecommerce_order_management.dto.response;
 
+import com.arya.ecommerce_order_management.entity.Inventory;
 import com.arya.ecommerce_order_management.entity.Product;
+import com.arya.ecommerce_order_management.entity.enums.InventoryStatus;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
@@ -10,15 +13,19 @@ public record ProductResponse(
         BigDecimal price,
         String description,
         String categoryName,
+        Integer stockCount,
+        InventoryStatus availability,
         LocalDateTime createdAt
 ) {
-    public static ProductResponse from(Product product) {
+    public static ProductResponse from(Product product, Inventory inventory) {
         return new ProductResponse(
                 product.getId(),
                 product.getName(),
                 product.getPrice(),
                 product.getDescription(),
                 product.getCategory().getName(),
+                inventory.getItemCount(),
+                inventory.getStatus(),
                 product.getCreatedAt()
         );
     }

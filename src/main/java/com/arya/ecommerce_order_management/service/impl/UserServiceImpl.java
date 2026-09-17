@@ -28,7 +28,7 @@ public class UserServiceImpl implements UserService {
     private final AddressRepository addressRepository;
     private final UserAddressRepository userAddressRepository;
 
-    @Override
+    /*@Override
     @Transactional
     public UserResponse registerUser(CreateUserRequest request) {
         if (userRepository.existsByEmail(request.email())) {
@@ -47,7 +47,7 @@ public class UserServiceImpl implements UserService {
         User savedUser = userRepository.save(newUser);
 
         return UserResponse.from(savedUser);
-    }
+    }*/
 
     @Override
     @Transactional(readOnly = true)
@@ -93,7 +93,7 @@ public class UserServiceImpl implements UserService {
     public List<AddressResponse> getUserAddresses(Long id) {
         if (!userRepository.existsById(id)) throw new ResourceNotFoundException("User", "id", id);
 
-        return userAddressRepository.findByUserId(id)
+        return userAddressRepository.findByUser_Id(id)
                 .stream()
                 .map(UserAddress::getAddress)
                 .map(AddressResponse::from)

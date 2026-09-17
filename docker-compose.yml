@@ -1,0 +1,82 @@
+version: '3.8'
+
+services:
+
+  # ─── MySQL Database ──────────────────────────────────────
+  mysql:
+    image: mysql:8.0
+    # Use official MySQL 8 image from Docker Hub
+    # No Dockerfile needed - pre-built image
+
+    container_name: ecommerce-mysql
+
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: ecommerce_order_management
+      # MySQL creates this database on first startup
+      # No need to manually create it
+
+    ports:
+      - "3307:3306"
+      # Expose MySQL port to host machine
+      # So you can connect from MySQL Workbench too
+
+    volumes:
+      - mysql_data:/var/lib/mysql
+      # Persist MySQL data between container restarts
+      # Without this: data lost every time container stops
+      # mysql_data is a named volume (defined below)
+
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      # Check if MySQL is ready before starting app
+      # App waits for MySQL to be healthy
+
+
+  # ─── Spring Boot Application ─────────────────────────────
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      # Build image from our Dockerfile
+      # context: . means look in current directory
+
+    container_name: ecommerce-app
+
+    ports:
+      - "8080:8080"
+
+    environment:
+      # Override application.yml with container values
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/ecommerce_order_management?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      #                                      ↑
+      #                              'mysql' = service name above
+      #                              NOT localhost
+      #                              NOT host.docker.internal
+      #                              Docker Compose creates internal network
+      #                              Services find each other by service name
+
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+      JWT_SECRET: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
+
+    depends_on:
+      mysql:
+        condition: service_healthy
+        # App starts ONLY after MySQL is healthy
+        # Prevents "connection refused" on startup
+        # Without this: app starts before MySQL is ready → crash
+
+    restart: on-failure
+    # If app crashes → Docker automatically restarts it
+
+
+# ─── Named Volumes ───────────────────────────────────────────
+volumes:
+  mysql_data:
+  # Docker manages this volume
+  # Data survives container stop/start/remove
+  # Deleted only with: docker compose down -v

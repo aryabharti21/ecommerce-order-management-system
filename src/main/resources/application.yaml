@@ -3,14 +3,14 @@ spring:
     name: ecommerce-order-management
 
   datasource:
-    url: jdbc:mysql://localhost:3306/ecommerce_oms?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+    url: jdbc:mysql://localhost:3306/ecommerce_order_management?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
     username: root
-    password: ab5631  #root for other
+    password: root
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   jpa:
     hibernate:
-      ddl-auto: validate
+      ddl-auto: update
     show-sql: true
     properties:
       hibernate:
@@ -21,6 +21,14 @@ spring:
     enabled: true
     locations: classpath:db/migration
     baseline-on-migrate: true
+    repair-on-migrate: true
+
+application:
+  security:
+    jwt:
+      secret-key: ${JWT_SECRET:404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970}
+      expiration: 900000          # 15 minutes
+      refresh-expiration: 604800000  # 7 days (future use)
 
 server:
   port: 8080
@@ -31,7 +39,14 @@ logging:
     org.springframework.boot.autoconfigure.flyway: DEBUG
     org.hibernate.orm.jdbc.bind: TRACE
 
-jwt:
-  secret: ${JWT_SECRET:this-is-a-temporary-local-dev-secret-change-me-before-prod-32chars-min}
-  expiration: 900000        # 15 minutes, in milliseconds — short-lived access token
-  refresh-expiration: 604800000   # 7 days, for the refresh token (we'll use this shortly)
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs          # JSON spec URL
+  swagger-ui:
+    path: /swagger-ui.html      # UI URL
+    tags-sorter: alpha          # sort tags alphabetically
+    operations-sorter: alpha    # sort methods alphabetically
+    display-request-duration: true  # show response time
+    try-it-out-enabled: true    # enable "Try it out" by default
+  show-actuator: false          # hide actuator endpoints

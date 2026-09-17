@@ -1,0 +1,13 @@
+# app-configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config
+data:
+  SPRING_DATASOURCE_URL: "jdbc:mysql://mysql-service:3306/ecommerce_order_management?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true"
+  #                                    ↑
+  #                          'mysql-service' = Service name from Step 3
+  #                          K8s DNS resolves this automatically
+  #                          Same concept as docker-compose service names
+
+  SPRING_DATASOURCE_USERNAME: "root"

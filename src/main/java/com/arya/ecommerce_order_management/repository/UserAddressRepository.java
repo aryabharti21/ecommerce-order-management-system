@@ -11,8 +11,8 @@ import java.util.List;
 @Repository
 public interface UserAddressRepository extends JpaRepository<UserAddress, UserAddressId> {
 
-    List<UserAddress> findByUserId(Long userId);
+    List<UserAddress> findByUser_Id(Long userId);
 
-    boolean existsByUserIdAndId_AddressId(Long userId, Long addressId);
+    boolean existsByUser_IdAndId_AddressId(Long userId, Long addressId);
 
 }

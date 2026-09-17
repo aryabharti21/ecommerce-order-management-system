@@ -2,11 +2,13 @@ package com.arya.ecommerce_order_management.controller;
 
 import com.arya.ecommerce_order_management.dto.request.CreatePaymentRequest;
 import com.arya.ecommerce_order_management.dto.response.PaymentResponse;
+import com.arya.ecommerce_order_management.entity.User;
 import com.arya.ecommerce_order_management.service.PaymentService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -18,10 +20,10 @@ public class PaymentController {
 
     @PostMapping
     public ResponseEntity<PaymentResponse> createPayment(
-            @RequestBody @Valid CreatePaymentRequest request) {
+            @RequestBody @Valid CreatePaymentRequest request, @AuthenticationPrincipal User currentUser) {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(paymentService.createPayment(request));
+                .body(paymentService.createPayment(request,currentUser.getId()));
     }
 
     @GetMapping("/order/{orderId}")

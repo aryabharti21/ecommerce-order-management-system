@@ -17,8 +17,10 @@ public interface InventoryRepository extends JpaRepository<Inventory, Long> {
     Optional<Inventory> findByProductId(Long productId);
 
     @Modifying
-    @Transactional
-    @Query("UPDATE Inventory i SET i.itemCount = i.itemCount - :quantity " +
+    @Query("UPDATE Inventory i SET i.itemCount = i.itemCount - :quantity, " +
+            " i.status = CASE WHEN (i.itemCount - :quantity) <= 0" +
+            " THEN 'OUT_OF_STOCK' " +
+            " ELSE 'AVAILABLE' END " +
             "WHERE i.product.id = :productId AND i.itemCount >= :quantity")
     int decreaseStock(
             @Param("productId") Long productId,
@@ -26,7 +28,6 @@ public interface InventoryRepository extends JpaRepository<Inventory, Long> {
     );
 
     @Modifying
-    @Transactional
     @Query("UPDATE Inventory i SET i.itemCount = i.itemCount + :quantity " +
             "WHERE i.product.id = :productId")
     int increaseStock(@Param("productId") Long productId,

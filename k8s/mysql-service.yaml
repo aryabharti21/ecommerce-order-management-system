@@ -1,0 +1,21 @@
+# mysql-service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql-service
+  # Other Pods reach MySQL using this name
+  # Just like "mysql" hostname in docker-compose
+
+spec:
+  selector:
+    app: mysql
+    # Routes traffic to Pods with label "app: mysql"
+
+  ports:
+    - port: 3306
+      targetPort: 3306
+
+  type: ClusterIP
+  # ClusterIP = only reachable INSIDE the cluster
+  # App Pod can reach it, but not from outside K8s
+  # Correct choice for database (should never be public)
